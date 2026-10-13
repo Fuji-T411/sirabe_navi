@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>しらべ学習ひろば - きみの味方！かんたん解説＆まとめアプリ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5',
+                        secondary: '#0ea5e9',
+                        accent: '#f59e0b',
+                        funbg: '#f8fafc',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1p:wght@400;700;800&display=swap');
+        body {
+            font-family: 'M PLUS Rounded 1p', sans-serif;
+            background-color: #f0fdf4;
+        }
+        /* Furigana styling helper */
+        rt {
+            font-size: 0.6em;
+            color: #4b5563;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-700 flex flex-col justify-between">
+
+    <header class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-emerald-600 p-2.5 rounded-2xl shadow-md text-xl font-black">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-wide">しらべ学習ひろば</h1>
+                    <p class="text-xs text-emerald-100">むずかしい文章も、パパッとかんたん！</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 bg-emerald-700/50 px-3 py-1.5 rounded-xl border border-emerald-400/30">
+                <label for="globalGrade" class="text-xs font-bold text-emerald-100"><i class="fa-solid fa-child-reaching mr-1"></i>がくねん:</label>
+                <select id="globalGrade" class="bg-white text-emerald-800 text-sm font-bold rounded-lg px-2 py-1 outline-none shadow-inner cursor-pointer">
+                    <option value="1">しょう1・2年生 (ひらがな多め)</option>
+                    <option value="3" selected>しょう3・4年生 (ていねい解説)</option>
+                    <option value="5">しょう5・6年生 (くわしく解説)</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-6 w-full flex-grow space-y-6">
+
+        <!-- Tabs Navigation -->
+        <div class="flex bg-white p-1.5 rounded-2xl shadow-sm border border-emerald-100 max-w-lg mx-auto">
+            <button onclick="switchTab('summarize')" id="tab-summarize" class="flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all bg-emerald-600 text-white shadow-sm flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <span>文章・URLから解説</span>
+            </button>
+            <button onclick="switchTab('explore')" id="tab-explore" class="flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-lightbulb"></i>
+                <span>次に調べること・疑問</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: Text Summarizer & URL Simplifier -->
+        <section id="panel-summarize" class="space-y-6">
+            <div class="bg-white rounded-3xl p-6 shadow-xl border border-emerald-100 grid md:grid-cols-2 gap-6">
+                <!-- Left Input Area -->
+                <div class="space-y-4 flex flex-col">
+                    <!-- Input Type Switcher (URL or Direct Text) -->
+                    <div class="bg-slate-100 p-1 rounded-xl flex text-xs font-bold">
+                        <button id="btnInputModeText" onclick="setInputMode('text')" class="flex-1 py-1.5 rounded-lg bg-white shadow text-emerald-700 transition-all flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-align-left"></i>
+                            <span>文章をはる</span>
+                        </button>
+                        <button id="btnInputModeUrl" onclick="setInputMode('url')" class="flex-1 py-1.5 rounded-lg text-slate-500 transition-all flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-link"></i>
+                            <span>ウェブサイトのURLを入れる</span>
+                        </button>
+                    </div>
+
+                    <!-- Direct Text Box Container -->
+                    <div id="modeTextContainer" class="space-y-2 flex-grow flex flex-col">
+                        <div class="flex justify-between items-center">
+                            <label class="font-black text-emerald-800 text-sm flex items-center">
+                                <i class="fa-solid fa-paste mr-1.5 text-emerald-500"></i>
+                                しらべた文章を入れる
+                            </label>
+                            <button onclick="loadSampleText()" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-lg transition-colors border border-emerald-200">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>サンプル文章
+                            </button>
+                        </div>
+                        <textarea id="sourceText" placeholder="ここにウェブサイトのむずかしい文章を貼り付けてね！" class="w-full flex-grow h-40 md:h-52 p-3 text-sm rounded-2xl border-2 border-emerald-100 focus:border-emerald-500 focus:outline-none resize-none shadow-inner"></textarea>
+                    </div>
+
+                    <!-- URL Input Box Container -->
+                    <div id="modeUrlContainer" class="hidden space-y-2 flex-grow flex flex-col justify-start">
+                        <div class="flex justify-between items-center">
+                            <label class="font-black text-emerald-800 text-sm flex items-center">
+                                <i class="fa-solid fa-globe mr-1.5 text-emerald-500"></i>
+                                調べたいウェブサイトのURL（アドレス）
+                            </label>
+                            <button onclick="loadSampleUrl()" class="text-xs text-emerald-600 hover:text-emerald-800 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-lg transition-colors border border-emerald-200">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>サンプルURL
+                            </button>
+                        </div>
+                        <input type="url" id="sourceUrl" placeholder="https://example.com/... サイトのURLを貼り付けてね" class="w-full p-3 text-sm rounded-2xl border-2 border-emerald-100 focus:border-emerald-500 focus:outline-none shadow-inner font-mono">
+                        <p class="text-xs text-slate-400 bg-emerald-50 p-3 rounded-xl border border-emerald-100 leading-relaxed">
+                            <i class="fa-solid fa-circle-info text-emerald-500 mr-1"></i>
+                            AIがGoogle検索を使ってそのURLのページ情報を読み取り、学年に合わせた言葉にまとめて教えてくれるよ！
+                        </p>
+                    </div>
+                    
+                    <button onclick="analyzeText()" id="analyzeBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-3.5 rounded-2xl shadow-lg transition-all transform active:scale-98 flex items-center justify-center space-x-2 text-base">
+                        <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
+                        <span>やさしく解説・要点整理する！</span>
+                    </button>
+                </div>
+
+                <!-- Right Output Area -->
+                <div class="bg-emerald-50/70 rounded-2xl p-5 border-2 border-dashed border-emerald-200 flex flex-col justify-between space-y-4">
+                    <div id="outputPlaceholder" class="h-full flex flex-col items-center justify-center text-center text-emerald-700/60 py-12 space-y-3">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md text-emerald-500 text-2xl">
+                            <i class="fa-solid fa-face-smile-beam"></i>
+                        </div>
+                        <p class="font-bold text-sm">左側から文章かURLを入れて、ボタンを押してね！<br>学年に合わせて、ふりがな付きでやさしく解説するよ。</p>
+                    </div>
+
+                    <div id="outputContainer" class="hidden space-y-4 overflow-y-auto max-h-[500px] pr-1">
+                        <!-- Key Summary / Points -->
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 space-y-2">
+                            <h3 class="text-xs font-black tracking-wider text-teal-700 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-list-check mr-1 text-teal-500"></i> ここがポイント！要点整理</span>
+                                <span class="bg-teal-100 text-teal-800 text-[10px] px-2 py-0.5 rounded-md font-extrabold">まとめ</span>
+                            </h3>
+                            <ul id="resultKeyPoints" class="space-y-2 text-sm text-slate-800"></ul>
+                        </div>
+
+                        <!-- Simplified Explanation -->
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 space-y-2">
+                            <h3 class="text-xs font-black tracking-wider text-emerald-700 uppercase flex items-center">
+                                <i class="fa-solid fa-book-open mr-1 text-emerald-500"></i> やさしい言葉でのくわしい解説
+                            </h3>
+                            <div id="resultExplanation" class="text-slate-800 text-sm leading-relaxed"></div>
+                        </div>
+
+                        <!-- Next Research Advice -->
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-2xl shadow-sm border border-amber-200 space-y-2">
+                            <h3 class="text-xs font-black tracking-wider text-amber-700 uppercase flex items-center">
+                                <i class="fa-solid fa-signs-post mr-1 text-amber-500"></i> つぎに調べるともっとすごい！アドバイス
+                            </h3>
+                            <p id="resultAdvice" class="text-slate-800 text-sm leading-relaxed font-medium"></p>
+                        </div>
+
+                        <!-- Grounding Sources (If Grounded via URL) -->
+                        <div id="resultSourcesContainer" class="hidden bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                            <h4 class="text-[11px] font-bold text-slate-500 flex items-center">
+                                <i class="fa-solid fa-link mr-1"></i> 参照したウェブサイトの情報
+                            </h4>
+                            <div id="resultSources" class="text-xs space-y-1 text-blue-600"></div>
+                        </div>
+                    </div>
+
+                    <div id="loadingIndicator" class="hidden flex flex-col items-center justify-center py-16 space-y-3">
+                        <div class="animate-spin text-emerald-600 text-4xl">
+                            <i class="fa-solid fa-spinner"></i>
+                        </div>
+                        <p class="text-emerald-700 font-bold text-sm animate-pulse">AIがページを読み込んで、やさしく整理中...✨</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: Keyword Explorer & Question Helper -->
+        <section id="panel-explore" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-6 shadow-xl border border-emerald-100 max-w-2xl mx-auto space-y-6">
+                <div class="text-center space-y-2">
+                    <div class="inline-block bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase mb-1">
+                        <i class="fa-solid fa-compass mr-1"></i> ヒントメーカー
+                    </div>
+                    <h2 class="text-xl font-black text-slate-800">きになった言葉やギモンを書いてみてね！</h2>
+                    <p class="text-xs text-slate-500">「もっと知りたいこと」や「なぜ？」を書き込むと、次に調べるとおもしろそうなアイデアをたくさん出してくれるよ。</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="relative">
+                        <input type="text" id="keywordInput" placeholder="例: ロボットのめ、宇宙人のごはん、縄文時代のくらし" class="w-full pl-12 pr-4 py-3.5 text-sm rounded-2xl border-2 border-emerald-100 focus:border-emerald-500 focus:outline-none shadow-inner font-bold">
+                        <div class="absolute left-4 top-3.5 text-emerald-500 text-lg">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                    </div>
+                    <button onclick="exploreIdeas()" id="exploreBtn" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-black py-3.5 rounded-2xl shadow-lg transition-all flex items-center justify-center space-x-2 text-base">
+                        <i class="fa-solid fa-lightbulb text-amber-300"></i>
+                        <span>調べ方のこうほや疑問をだしてもらう！</span>
+                    </button>
+                </div>
+
+                <!-- Explore Results Box -->
+                <div id="exploreLoading" class="hidden flex flex-col items-center justify-center py-10 space-y-3">
+                    <div class="animate-spin text-teal-600 text-3xl"><i class="fa-solid fa-spinner"></i></div>
+                    <p class="text-teal-700 font-bold text-xs animate-pulse">おもしろい調べ方のアイデアをさがしてるよ...</p>
+                </div>
+
+                <div id="exploreOutputContainer" class="hidden space-y-4 pt-2">
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 space-y-3">
+                        <h3 class="text-xs font-black text-emerald-800 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-list-check mr-1.5 text-emerald-600"></i> 次にしらべてみるとおもしろいテーマ・こうほ
+                        </h3>
+                        <div id="exploreIdeasResult" class="space-y-2 text-sm"></div>
+                    </div>
+
+                    <div class="bg-teal-50 p-4 rounded-2xl border border-teal-200 space-y-3">
+                        <h3 class="text-xs font-black text-teal-800 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-circle-question mr-1.5 text-teal-600"></i> もっと深めるための「おもしろいギモン」
+                        </h3>
+                        <div id="exploreQuestionsResult" class="space-y-2 text-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-emerald-100 py-4 mt-8 text-center text-xs text-slate-400 font-bold">
+        <p>しらべ学習ひろば - 小学生のみんなの楽しい発見をうえぶからサポートするよ！</p>
+    </footer>
+
+    <script>
+        let currentInputMode = 'text';
+
+        function setInputMode(mode) {
+            currentInputMode = mode;
+            const btnText = document.getElementById('btnInputModeText');
+            const btnUrl = document.getElementById('btnInputModeUrl');
+            const containerText = document.getElementById('modeTextContainer');
+            const containerUrl = document.getElementById('modeUrlContainer');
+
+            if (mode === 'text') {
+                btnText.className = "flex-1 py-1.5 rounded-lg bg-white shadow text-emerald-700 transition-all flex items-center justify-center space-x-1 font-bold";
+                btnUrl.className = "flex-1 py-1.5 rounded-lg text-slate-500 transition-all flex items-center justify-center space-x-1 font-bold";
+                containerText.classList.remove('hidden');
+                containerUrl.classList.add('hidden');
+            } else {
+                btnUrl.className = "flex-1 py-1.5 rounded-lg bg-white shadow text-emerald-700 transition-all flex items-center justify-center space-x-1 font-bold";
+                btnText.className = "flex-1 py-1.5 rounded-lg text-slate-500 transition-all flex items-center justify-center space-x-1 font-bold";
+                containerUrl.classList.remove('hidden');
+                containerText.classList.add('hidden');
+            }
+        }
+
+        function loadSampleUrl() {
+            document.getElementById('sourceUrl').value = "https://ja.wikipedia.org/wiki/太陽系";
+        }
+
+        // Tab switching logic
+        function switchTab(tabName) {
+            const tabSummarize = document.getElementById('tab-summarize');
+            const tabExplore = document.getElementById('tab-explore');
+            const panelSummarize = document.getElementById('panel-summarize');
+            const panelExplore = document.getElementById('panel-explore');
+
+            if (tabName === 'summarize') {
+                tabSummarize.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all bg-emerald-600 text-white shadow-sm flex items-center justify-center space-x-1.5";
+                tabExplore.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5";
+                panelSummarize.classList.remove('hidden');
+                panelExplore.classList.add('hidden');
+            } else {
+                tabExplore.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all bg-emerald-600 text-white shadow-sm flex items-center justify-center space-x-1.5";
+                tabSummarize.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5";
+                panelExplore.classList.remove('hidden');
+                panelSummarize.classList.add('hidden');
+            }
+        }
+
+        // Sample text loader for quick testing
+        function loadSampleText() {
+            const sample = "光合成（こうごうせい）とは、植物が太陽の光エネルギーを使って、二酸化炭素と水から、自分たちの栄養となるデンプンなどの有機物をつくり出す大切なしくみです。このとき、酸素もいっしょにつくられて空気中に放出されるため、地球上のすべての生き物が息を吸うための酸素をまもるうえでも、非常に重要なはたらきをしています。葉緑体と呼ばれる緑色のつぶでこの反応がおこります。";
+            document.getElementById('sourceText').value = sample;
+        }
+
+        // Helper function for exponential backoff on Gemini API calls
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    if (response.status === 429 && retries > 0) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return fetchWithRetry(url, options, retries - 1, delay * 2);
+                    }
+                    throw new Error(`API error: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                }
+                throw error;
+            }
+        }
+
+        async function analyzeText() {
+            const grade = document.getElementById('globalGrade').value;
+            let inputText = '';
+            let inputUrl = '';
+
+            if (currentInputMode === 'text') {
+                inputText = document.getElementById('sourceText').value.trim();
+                if (!inputText) {
+                    alert("文章を入力するか、サンプルの文章をいれてね！");
+                    return;
+                }
+            } else {
+                inputUrl = document.getElementById('sourceUrl').value.trim();
+                if (!inputUrl) {
+                    alert("ウェブサイトのURLを入力してね！");
+                    return;
+                }
+            }
+
+            const outputPlaceholder = document.getElementById('outputPlaceholder');
+            const outputContainer = document.getElementById('outputContainer');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+
+            outputPlaceholder.classList.add('hidden');
+            outputContainer.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            analyzeBtn.disabled = true;
+
+            const gradeName = grade === '1' ? '小学校1・2年生（漢字は少なめにし、やさしいひらがなまじりの表現にする）' : (grade === '3' ? '小学校3・4年生（一般的な漢字を使いつつ、丁寧で分かりやすい言葉にする）' : '小学校5・6年生（中学校につながる少し詳しい言葉も使いつつ論理的に解説する）');
+
+            const systemPrompt = `あなたは小学生の調べ学習を全力で応援するやさしい先生AIです。
+指定された学年向けに文章やウェブサイトの内容をやさしく解説・要点整理し、次に調べるとよいアドバイスを提案してください。
+
+重要指示:
+- 指定された学年に合わせて難易度を調整してください。
+- 漢字には必ずHTMLの<ruby>漢字<rt>かんじ</rt></ruby>タグでふりがな（ルビ）をつけてください。
+- 必ず正当なJSONフォーマットで返答してください。余計な文字列や記号は含めないでください。
+
+JSON形式:
+{
+  "explanation": "指定学年に合わせた優しい解説文（<ruby>漢字<rt>ふりがな</rt></ruby>付き）",
+  "key_points": [
+    "要点1（簡潔でわかりやすい文章、ふりがな付き）",
+    "要点2",
+    "要点3"
+  ],
+  "advice": "次に調べるともっと面白くなるアドバイスや提案"
+}`;
+
+            let userPrompt = `対象学年: ${gradeName}\n\n`;
+            if (currentInputMode === 'text') {
+                userPrompt += `以下の文章の内容をわかりやすく要点整理し、解説してください：\n${inputText}`;
+            } else {
+                userPrompt += `指定されたウェブサイトURL（${inputUrl}）の内容を確認し、そのサイトが解説しているテーマについて要点整理と分かりやすい解説を行ってください。`;
+            }
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            };
+
+            // Enable Google Search grounding if input is URL
+            if (currentInputMode === 'url') {
+                payload.tools = [{ "google_search": {} }];
+            }
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const data = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const candidate = data.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    let text = candidate.content.parts[0].text.trim();
+                    if (text.startsWith('```')) {
+                        text = text.replace(/^```(json)?\n?/, '').replace(/\n?```$/, '');
+                    }
+
+                    const resultJson = JSON.parse(text);
+
+                    document.getElementById('resultExplanation').innerHTML = resultJson.explanation || '';
+
+                    const pointsList = document.getElementById('resultKeyPoints');
+                    pointsList.innerHTML = '';
+                    if (Array.isArray(resultJson.key_points)) {
+                        resultJson.key_points.forEach((pt, index) => {
+                            const li = document.createElement('li');
+                            li.className = "flex items-start bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100 font-medium";
+                            li.innerHTML = `<span class="bg-teal-500 text-white text-xs font-black px-2 py-0.5 rounded-lg mr-2 mt-0.5 shadow-sm">${index + 1}</span><div class="flex-grow">${pt}</div>`;
+                            pointsList.appendChild(li);
+                        });
+                    }
+
+                    document.getElementById('resultAdvice').innerHTML = resultJson.advice || '';
+
+                    const sourcesContainer = document.getElementById('resultSourcesContainer');
+                    const sourcesList = document.getElementById('resultSources');
+                    sourcesList.innerHTML = '';
+
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions && groundingMetadata.groundingAttributions.length > 0) {
+                        groundingMetadata.groundingAttributions.forEach(attr => {
+                            if (attr.web?.uri && attr.web?.title) {
+                                const a = document.createElement('a');
+                                a.href = attr.web.uri;
+                                a.target = "_blank";
+                                a.rel = "noopener noreferrer";
+                                a.className = "block hover:underline truncate";
+                                a.innerHTML = `<i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> ${attr.web.title}`;
+                                sourcesList.appendChild(a);
+                            }
+                        });
+                        sourcesContainer.classList.remove('hidden');
+                    } else {
+                        sourcesContainer.classList.add('hidden');
+                    }
+
+                    loadingIndicator.classList.add('hidden');
+                    outputContainer.classList.remove('hidden');
+                } else {
+                    throw new Error("正しい答えが得られませんでした。");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("データの読み込み・要約に失敗しました。URLや文章をもう一度確かめて試してみてください。");
+                loadingIndicator.classList.add('hidden');
+                outputPlaceholder.classList.remove('hidden');
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        async function exploreIdeas() {
+            const keyword = document.getElementById('keywordInput').value.trim();
+            const grade = document.getElementById('globalGrade').value;
+
+            if (!keyword) {
+                alert("きになった言葉や疑問をひとつ入力してね！");
+                return;
+            }
+
+            const exploreLoading = document.getElementById('exploreLoading');
+            const exploreOutputContainer = document.getElementById('exploreOutputContainer');
+            const exploreBtn = document.getElementById('exploreBtn');
+
+            exploreOutputContainer.classList.add('hidden');
+            exploreLoading.classList.remove('hidden');
+            exploreBtn.disabled = true;
+
+            const systemPrompt = `あなたは小学生の探究学習・調べ学習をサポートするアドバイザーです。
+ユーザーが興味をもった言葉や疑問について、小学生が次に調べると面白いテーマの候補と、さらに探究を深めるための素晴らしい「ギモン（問い）」を提案してください。
+指定された学年に合わせた分かりやすい表現を使い、重要な漢字には<ruby>漢字<rt>かんじ</rt></ruby>タグでふりがなをつけてください。
+
+必ず以下のJSON形式のみで返答してください。余分なテキストを含めないでください。
+
+{
+  "ideas": [
+    "調べ方のこうほ・テーマ1（ふりがな付き）",
+    "調べ方のこうほ・テーマ2",
+    "調べ方のこうほ・テーマ3"
+  ],
+  "questions": [
+    "もっと深く考えるための疑問1（ふりがな付き）",
+    "もっと深く考えるための疑問2"
+  ]
+}`;
+
+            const userPrompt = `学年: 小学${grade}年生くらい\n興味のある言葉・疑問: ${keyword}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            ideas: {
+                                type: "ARRAY",
+                                items: { type: "STRING" }
+                            },
+                            questions: {
+                                type: "ARRAY",
+                                items: { type: "STRING" }
+                            }
+                        },
+                        propertyOrdering: ["ideas", "questions"]
+                    }
+                }
+            };
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const data = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const candidate = data.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const resJson = JSON.parse(candidate.content.parts[0].text);
+
+                    const ideasEl = document.getElementById('exploreIdeasResult');
+                    ideasEl.innerHTML = '';
+                    resJson.ideas.forEach((item, idx) => {
+                        const div = document.createElement('div');
+                        div.className = "bg-white p-3 rounded-xl border border-emerald-100 shadow-sm flex items-center space-x-2";
+                        div.innerHTML = `<span class="bg-emerald-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shadow-sm">${idx + 1}</span><div class="font-medium">${item}</div>`;
+                        ideasEl.appendChild(div);
+                    });
+
+                    const questionsEl = document.getElementById('exploreQuestionsResult');
+                    questionsEl.innerHTML = '';
+                    resJson.questions.forEach((item, idx) => {
+                        const div = document.createElement('div');
+                        div.className = "bg-white p-3 rounded-xl border border-teal-100 shadow-sm flex items-center space-x-2";
+                        div.innerHTML = `<span class="bg-teal-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shadow-sm">Q${idx + 1}</span><div class="font-medium">${item}</div>`;
+                        questionsEl.appendChild(div);
+                    });
+
+                    exploreLoading.classList.add('hidden');
+                    exploreOutputContainer.classList.remove('hidden');
+                } else {
+                    throw new Error("データ取得に失敗しました");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("エラーが発生しました。もういちどお試しください。");
+                exploreLoading.classList.add('hidden');
+            } finally {
+                exploreBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
