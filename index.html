@@ -26,7 +26,6 @@
             font-family: 'M PLUS Rounded 1p', sans-serif;
             background-color: #f0fdf4;
         }
-        /* Furigana styling helper */
         rt {
             font-size: 0.6em;
             color: #4b5563;
@@ -47,16 +46,50 @@
                     <p class="text-xs text-emerald-100">むずかしい文章も、パパッとかんたん！</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 bg-emerald-700/50 px-3 py-1.5 rounded-xl border border-emerald-400/30">
-                <label for="globalGrade" class="text-xs font-bold text-emerald-100"><i class="fa-solid fa-child-reaching mr-1"></i>がくねん:</label>
-                <select id="globalGrade" class="bg-white text-emerald-800 text-sm font-bold rounded-lg px-2 py-1 outline-none shadow-inner cursor-pointer">
-                    <option value="1">しょう1・2年生 (ひらがな多め)</option>
-                    <option value="3" selected>しょう3・4年生 (ていねい解説)</option>
-                    <option value="5">しょう5・6年生 (くわしく解説)</option>
-                </select>
+            <div class="flex items-center space-x-2">
+                <button onclick="openApiKeyModal()" class="bg-emerald-700/70 hover:bg-emerald-700 text-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-400/30 text-xs font-bold transition-all flex items-center space-x-1">
+                    <i class="fa-solid fa-key text-amber-300"></i>
+                    <span>設定</span>
+                </button>
+                <div class="flex items-center space-x-2 bg-emerald-700/50 px-3 py-1.5 rounded-xl border border-emerald-400/30">
+                    <label for="globalGrade" class="text-xs font-bold text-emerald-100"><i class="fa-solid fa-child-reaching mr-1"></i>がくねん:</label>
+                    <select id="globalGrade" class="bg-white text-emerald-800 text-sm font-bold rounded-lg px-2 py-1 outline-none shadow-inner cursor-pointer">
+                        <option value="1">しょう1・2年生 (ひらがな多め)</option>
+                        <option value="3" selected>しょう3・4年生 (ていねい解説)</option>
+                        <option value="5">しょう5・6年生 (くわしく解説)</option>
+                    </select>
+                </div>
             </div>
         </div>
     </header>
+
+    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-emerald-100 space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-black text-emerald-800 text-base flex items-center">
+                    <i class="fa-solid fa-key mr-2 text-amber-500"></i>APIキー設定（パターンB対応）
+                </h3>
+                <button onclick="closeApiKeyModal()" class="text-slate-400 hover:text-slate-600 font-bold">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                URLパラメータ（?key=...）がない場合や、個別でキーを設定・上書きしたい場合はここに入力してください。
+            </p>
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-700">Gemini API Key</label>
+                <input type="password" id="customApiKey" placeholder="AQ.Ab8RN6..." class="w-full p-3 text-sm rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:outline-none font-mono">
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="saveApiKey()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl shadow transition-all text-sm">
+                    保存する
+                </button>
+                <button onclick="clearApiKey()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 px-4 rounded-xl transition-all text-sm">
+                    消去
+                </button>
+            </div>
+        </div>
+    </div>
 
     <main class="max-w-5xl mx-auto px-4 py-6 w-full flex-grow space-y-6">
 
@@ -77,7 +110,6 @@
             <div class="bg-white rounded-3xl p-6 shadow-xl border border-emerald-100 grid md:grid-cols-2 gap-6">
                 <!-- Left Input Area -->
                 <div class="space-y-4 flex flex-col">
-                    <!-- Input Type Switcher (URL or Direct Text) -->
                     <div class="bg-slate-100 p-1 rounded-xl flex text-xs font-bold">
                         <button id="btnInputModeText" onclick="setInputMode('text')" class="flex-1 py-1.5 rounded-lg bg-white shadow text-emerald-700 transition-all flex items-center justify-center space-x-1">
                             <i class="fa-solid fa-align-left"></i>
@@ -89,7 +121,6 @@
                         </button>
                     </div>
 
-                    <!-- Direct Text Box Container -->
                     <div id="modeTextContainer" class="space-y-2 flex-grow flex flex-col">
                         <div class="flex justify-between items-center">
                             <label class="font-black text-emerald-800 text-sm flex items-center">
@@ -103,7 +134,6 @@
                         <textarea id="sourceText" placeholder="ここにウェブサイトのむずかしい文章を貼り付けてね！" class="w-full flex-grow h-40 md:h-52 p-3 text-sm rounded-2xl border-2 border-emerald-100 focus:border-emerald-500 focus:outline-none resize-none shadow-inner"></textarea>
                     </div>
 
-                    <!-- URL Input Box Container -->
                     <div id="modeUrlContainer" class="hidden space-y-2 flex-grow flex flex-col justify-start">
                         <div class="flex justify-between items-center">
                             <label class="font-black text-emerald-800 text-sm flex items-center">
@@ -137,7 +167,6 @@
                     </div>
 
                     <div id="outputContainer" class="hidden space-y-4 overflow-y-auto max-h-[500px] pr-1">
-                        <!-- Key Summary / Points -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 space-y-2">
                             <h3 class="text-xs font-black tracking-wider text-teal-700 uppercase flex items-center justify-between">
                                 <span><i class="fa-solid fa-list-check mr-1 text-teal-500"></i> ここがポイント！要点整理</span>
@@ -146,7 +175,6 @@
                             <ul id="resultKeyPoints" class="space-y-2 text-sm text-slate-800"></ul>
                         </div>
 
-                        <!-- Simplified Explanation -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 space-y-2">
                             <h3 class="text-xs font-black tracking-wider text-emerald-700 uppercase flex items-center">
                                 <i class="fa-solid fa-book-open mr-1 text-emerald-500"></i> やさしい言葉でのくわしい解説
@@ -154,7 +182,6 @@
                             <div id="resultExplanation" class="text-slate-800 text-sm leading-relaxed"></div>
                         </div>
 
-                        <!-- Next Research Advice -->
                         <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-2xl shadow-sm border border-amber-200 space-y-2">
                             <h3 class="text-xs font-black tracking-wider text-amber-700 uppercase flex items-center">
                                 <i class="fa-solid fa-signs-post mr-1 text-amber-500"></i> つぎに調べるともっとすごい！アドバイス
@@ -162,7 +189,6 @@
                             <p id="resultAdvice" class="text-slate-800 text-sm leading-relaxed font-medium"></p>
                         </div>
 
-                        <!-- Grounding Sources (If Grounded via URL) -->
                         <div id="resultSourcesContainer" class="hidden bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
                             <h4 class="text-[11px] font-bold text-slate-500 flex items-center">
                                 <i class="fa-solid fa-link mr-1"></i> 参照したウェブサイトの情報
@@ -205,7 +231,6 @@
                     </button>
                 </div>
 
-                <!-- Explore Results Box -->
                 <div id="exploreLoading" class="hidden flex flex-col items-center justify-center py-10 space-y-3">
                     <div class="animate-spin text-teal-600 text-3xl"><i class="fa-solid fa-spinner"></i></div>
                     <p class="text-teal-700 font-bold text-xs animate-pulse">おもしろい調べ方のアイデアをさがしてるよ...</p>
@@ -236,94 +261,138 @@
     </footer>
 
     <script>
+        // パターンB：URLパラメータ ?key= から自動取得できるようサポート
         let currentInputMode = 'text';
+
+        function getActiveApiKey() {
+            // 1. URLパラメータ ?key= が最優先
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryKey = urlParams.get('key');
+            if (queryKey) {
+                return queryKey.trim();
+            }
+
+            // 2. 個別保存されたキーがあれば使用
+            const customKey = localStorage.getItem('gemini_custom_api_key');
+            if (customKey) {
+                return customKey.trim();
+            }
+
+            return "";
+        }
+
+        function openApiKeyModal() {
+            const current = getActiveApiKey();
+            document.getElementById('customApiKey').value = current;
+            document.getElementById('apiKeyModal').classList.remove('hidden');
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('apiKeyModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const val = document.getElementById('customApiKey').value.trim();
+            if (val) {
+                localStorage.setItem('gemini_custom_api_key', val);
+                alert("APIキーを保存しました！");
+                closeApiKeyModal();
+            } else {
+                alert("有効なAPIキーを入力してください。");
+            }
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem('gemini_custom_api_key');
+            document.getElementById('customApiKey').value = "";
+            alert("個別キーを削除しました。");
+            closeApiKeyModal();
+        }
 
         function setInputMode(mode) {
             currentInputMode = mode;
+            const textContainer = document.getElementById('modeTextContainer');
+            const urlContainer = document.getElementById('modeUrlContainer');
             const btnText = document.getElementById('btnInputModeText');
             const btnUrl = document.getElementById('btnInputModeUrl');
-            const containerText = document.getElementById('modeTextContainer');
-            const containerUrl = document.getElementById('modeUrlContainer');
 
             if (mode === 'text') {
-                btnText.className = "flex-1 py-1.5 rounded-lg bg-white shadow text-emerald-700 transition-all flex items-center justify-center space-x-1 font-bold";
-                btnUrl.className = "flex-1 py-1.5 rounded-lg text-slate-500 transition-all flex items-center justify-center space-x-1 font-bold";
-                containerText.classList.remove('hidden');
-                containerUrl.classList.add('hidden');
+                textContainer.classList.remove('hidden');
+                urlContainer.classList.add('hidden');
+                btnText.className = "flex-1 py-1.5 rounded-lg bg-white shadow text-emerald-700 transition-all flex items-center justify-center space-x-1";
+                btnUrl.className = "flex-1 py-1.5 rounded-lg text-slate-500 transition-all flex items-center justify-center space-x-1";
             } else {
-                btnUrl.className = "flex-1 py-1.5 rounded-lg bg-white shadow text-emerald-700 transition-all flex items-center justify-center space-x-1 font-bold";
-                btnText.className = "flex-1 py-1.5 rounded-lg text-slate-500 transition-all flex items-center justify-center space-x-1 font-bold";
-                containerUrl.classList.remove('hidden');
-                containerText.classList.add('hidden');
+                textContainer.classList.add('hidden');
+                urlContainer.classList.remove('hidden');
+                btnUrl.className = "flex-1 py-1.5 rounded-lg bg-white shadow text-emerald-700 transition-all flex items-center justify-center space-x-1";
+                btnText.className = "flex-1 py-1.5 rounded-lg text-slate-500 transition-all flex items-center justify-center space-x-1";
             }
+        }
+
+        function switchTab(tab) {
+            const tabSum = document.getElementById('tab-summarize');
+            const tabExp = document.getElementById('tab-explore');
+            const panelSum = document.getElementById('panel-summarize');
+            const panelExp = document.getElementById('panel-explore');
+
+            if (tab === 'summarize') {
+                tabSum.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all bg-emerald-600 text-white shadow-sm flex items-center justify-center space-x-1.5";
+                tabExp.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5";
+                panelSum.classList.remove('hidden');
+                panelExp.classList.add('hidden');
+            } else {
+                tabExp.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all bg-emerald-600 text-white shadow-sm flex items-center justify-center space-x-1.5";
+                tabSum.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5";
+                panelExp.classList.remove('hidden');
+                panelSum.classList.add('hidden');
+            }
+        }
+
+        function loadSampleText() {
+            document.getElementById('sourceText').value = "サンゴ礁は、海の熱帯林ともよばれ、さまざまな生き物がくらしている場所です。地球温暖化による海水の温度上昇や、海のよごれによってサンゴの白化現象が起きており、生態系への影響が心配されています。世界中でサンゴを守るための植え付けや、環境にやさしい観光の取り組みが進められています。";
         }
 
         function loadSampleUrl() {
-            document.getElementById('sourceUrl').value = "https://ja.wikipedia.org/wiki/太陽系";
+            document.getElementById('sourceUrl').value = "https://ja.wikipedia.org/wiki/サンゴ礁";
         }
 
-        // Tab switching logic
-        function switchTab(tabName) {
-            const tabSummarize = document.getElementById('tab-summarize');
-            const tabExplore = document.getElementById('tab-explore');
-            const panelSummarize = document.getElementById('panel-summarize');
-            const panelExplore = document.getElementById('panel-explore');
-
-            if (tabName === 'summarize') {
-                tabSummarize.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all bg-emerald-600 text-white shadow-sm flex items-center justify-center space-x-1.5";
-                tabExplore.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5";
-                panelSummarize.classList.remove('hidden');
-                panelExplore.classList.add('hidden');
-            } else {
-                tabExplore.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all bg-emerald-600 text-white shadow-sm flex items-center justify-center space-x-1.5";
-                tabSummarize.className = "flex-1 py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5";
-                panelExplore.classList.remove('hidden');
-                panelSummarize.classList.add('hidden');
-            }
-        }
-
-        // Sample text loader for quick testing
-        function loadSampleText() {
-            const sample = "光合成（こうごうせい）とは、植物が太陽の光エネルギーを使って、二酸化炭素と水から、自分たちの栄養となるデンプンなどの有機物をつくり出す大切なしくみです。このとき、酸素もいっしょにつくられて空気中に放出されるため、地球上のすべての生き物が息を吸うための酸素をまもるうえでも、非常に重要なはたらきをしています。葉緑体と呼ばれる緑色のつぶでこの反応がおこります。";
-            document.getElementById('sourceText').value = sample;
-        }
-
-        // Helper function for exponential backoff on Gemini API calls
         async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
-            try {
-                const response = await fetch(url, options);
-                if (!response.ok) {
-                    if (response.status === 429 && retries > 0) {
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        return fetchWithRetry(url, options, retries - 1, delay * 2);
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        const errText = await response.text();
+                        throw new Error(`API Error: ${response.status} ${errText}`);
                     }
-                    throw new Error(`API error: ${response.status}`);
+                    return await response.json();
+                } catch (err) {
+                    if (i === retries - 1) throw err;
+                    await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
                 }
-                return await response.json();
-            } catch (error) {
-                if (retries > 0) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    return fetchWithRetry(url, options, retries - 1, delay * 2);
-                }
-                throw error;
             }
         }
 
         async function analyzeText() {
+            const apiKey = getActiveApiKey();
+            if (!apiKey) {
+                alert("APIキーが設定されていません。URLに「?key=あなたのAPIキー」を付けてアクセスするか、右上の「設定」からキーを入力してください。");
+                openApiKeyModal();
+                return;
+            }
+
             const grade = document.getElementById('globalGrade').value;
-            let inputText = '';
-            let inputUrl = '';
+            let targetContent = "";
 
             if (currentInputMode === 'text') {
-                inputText = document.getElementById('sourceText').value.trim();
-                if (!inputText) {
-                    alert("文章を入力するか、サンプルの文章をいれてね！");
+                targetContent = document.getElementById('sourceText').value.trim();
+                if (!targetContent) {
+                    alert("しらべたい文章をいれてね！");
                     return;
                 }
             } else {
-                inputUrl = document.getElementById('sourceUrl').value.trim();
-                if (!inputUrl) {
-                    alert("ウェブサイトのURLを入力してね！");
+                targetContent = document.getElementById('sourceUrl').value.trim();
+                if (!targetContent) {
+                    alert("調べたいウェブサイトのURLをいれてね！");
                     return;
                 }
             }
@@ -338,48 +407,58 @@
             loadingIndicator.classList.remove('hidden');
             analyzeBtn.disabled = true;
 
-            const gradeName = grade === '1' ? '小学校1・2年生（漢字は少なめにし、やさしいひらがなまじりの表現にする）' : (grade === '3' ? '小学校3・4年生（一般的な漢字を使いつつ、丁寧で分かりやすい言葉にする）' : '小学校5・6年生（中学校につながる少し詳しい言葉も使いつつ論理的に解説する）');
+            const systemPrompt = `あなたは小学生の調べ学習・自由研究を応援するやさしい先生AIです。
+ユーザーから提供された文章、またはURL先の情報について、以下の条件に従ってわかりやすく解説と要点整理を行ってください。
 
-            const systemPrompt = `あなたは小学生の調べ学習を全力で応援するやさしい先生AIです。
-指定された学年向けに文章やウェブサイトの内容をやさしく解説・要点整理し、次に調べるとよいアドバイスを提案してください。
+1. 小学${grade}年生（1-2年はひらがな多め、3-4年はていねい、5-6年はくわしく）に合わせた言葉づかいにしてください。
+2. 重要な漢字には必ず<ruby>漢字<rt>かんじ</rt></ruby>タグを使ってふりがなを振ってください。
+3. 情報を整理した「要点（key_points）」（3〜4個の箇条書き）を作成してください。
+4. かんたんな言葉で全体を解説した「解説（explanation）」を作成してください。
+5. 「次に調べるともっと面白くなることやアドバイス（advice）」を書いてください。
 
-重要指示:
-- 指定された学年に合わせて難易度を調整してください。
-- 漢字には必ずHTMLの<ruby>漢字<rt>かんじ</rt></ruby>タグでふりがな（ルビ）をつけてください。
-- 必ず正当なJSONフォーマットで返答してください。余計な文字列や記号は含めないでください。
+必ず以下のJSON形式のみで返答してください。
 
-JSON形式:
 {
-  "explanation": "指定学年に合わせた優しい解説文（<ruby>漢字<rt>ふりがな</rt></ruby>付き）",
   "key_points": [
-    "要点1（簡潔でわかりやすい文章、ふりがな付き）",
+    "要点1（ふりがな付き）",
     "要点2",
     "要点3"
   ],
-  "advice": "次に調べるともっと面白くなるアドバイスや提案"
+  "explanation": "ここにやさしい言葉でのくわしい解説文を入れます。<ruby>漢字<rt>かんじ</rt></ruby>も含めます。",
+  "advice": "次に調べるともっとすごい発見ができるよ、というアドバイス"
 }`;
 
-            let userPrompt = `対象学年: ${gradeName}\n\n`;
+            let userPrompt = "";
             if (currentInputMode === 'text') {
-                userPrompt += `以下の文章の内容をわかりやすく要点整理し、解説してください：\n${inputText}`;
+                userPrompt = `以下の文章をやさしく要約・解説してください:\n\n${targetContent}`;
             } else {
-                userPrompt += `指定されたウェブサイトURL（${inputUrl}）の内容を確認し、そのサイトが解説しているテーマについて要点整理と分かりやすい解説を行ってください。`;
+                userPrompt = `次のURLのページ内容をGoogle検索等で読み込み、小学生向けに要約・解説してください。URL: ${targetContent}`;
             }
 
             const payload = {
                 contents: [{ parts: [{ text: userPrompt }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
-                    responseMimeType: "application/json"
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            key_points: {
+                                type: "ARRAY",
+                                items: { type: "STRING" }
+                            },
+                            explanation: { type: "STRING" },
+                            advice: { type: "STRING" }
+                        },
+                        propertyOrdering: ["key_points", "explanation", "advice"]
+                    }
                 }
             };
 
-            // Enable Google Search grounding if input is URL
             if (currentInputMode === 'url') {
                 payload.tools = [{ "google_search": {} }];
             }
 
-            const apiKey = "";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
             try {
@@ -442,7 +521,7 @@ JSON形式:
                 }
             } catch (err) {
                 console.error(err);
-                alert("データの読み込み・要約に失敗しました。URLや文章をもう一度確かめて試してみてください。");
+                alert("データの読み込み・要約に失敗しました。URLや文章、APIキーをもう一度確かめて試してみてください。");
                 loadingIndicator.classList.add('hidden');
                 outputPlaceholder.classList.remove('hidden');
             } finally {
@@ -451,6 +530,13 @@ JSON形式:
         }
 
         async function exploreIdeas() {
+            const apiKey = getActiveApiKey();
+            if (!apiKey) {
+                alert("APIキーが設定されていません。URLに「?key=あなたのAPIキー」を付けてアクセスするか、右上の「設定」からキーを入力してください。");
+                openApiKeyModal();
+                return;
+            }
+
             const keyword = document.getElementById('keywordInput').value.trim();
             const grade = document.getElementById('globalGrade').value;
 
@@ -471,7 +557,7 @@ JSON形式:
 ユーザーが興味をもった言葉や疑問について、小学生が次に調べると面白いテーマの候補と、さらに探究を深めるための素晴らしい「ギモン（問い）」を提案してください。
 指定された学年に合わせた分かりやすい表現を使い、重要な漢字には<ruby>漢字<rt>かんじ</rt></ruby>タグでふりがなをつけてください。
 
-必ず以下のJSON形式のみで返答してください。余分なテキストを含めないでください。
+必ず以下のJSON形式のみで返答してください。
 
 {
   "ideas": [
@@ -509,7 +595,6 @@ JSON形式:
                 }
             };
 
-            const apiKey = "";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
             try {
@@ -521,7 +606,11 @@ JSON形式:
 
                 const candidate = data.candidates?.[0];
                 if (candidate && candidate.content?.parts?.[0]?.text) {
-                    const resJson = JSON.parse(candidate.content.parts[0].text);
+                    let text = candidate.content.parts[0].text.trim();
+                    if (text.startsWith('```')) {
+                        text = text.replace(/^```(json)?\n?/, '').replace(/\n?```$/, '');
+                    }
+                    const resJson = JSON.parse(text);
 
                     const ideasEl = document.getElementById('exploreIdeasResult');
                     ideasEl.innerHTML = '';
@@ -541,7 +630,7 @@ JSON形式:
                         questionsEl.appendChild(div);
                     });
 
-                    exploreLoading.classList.add('hidden');
+    exploreLoading.classList.add('hidden');
                     exploreOutputContainer.classList.remove('hidden');
                 } else {
                     throw new Error("データ取得に失敗しました");
