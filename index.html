@@ -67,14 +67,14 @@
         <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-emerald-100 space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="font-black text-emerald-800 text-base flex items-center">
-                    <i class="fa-solid fa-key mr-2 text-amber-500"></i>APIキー設定（パターンB対応）
+                    <i class="fa-solid fa-key mr-2 text-amber-500"></i>APIキー設定
                 </h3>
                 <button onclick="closeApiKeyModal()" class="text-slate-400 hover:text-slate-600 font-bold">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
             <p class="text-xs text-slate-500 leading-relaxed">
-                URLパラメータ（?key=...）がない場合や、個別でキーを設定・上書きしたい場合はここに入力してください。
+                最初に一度だけ、Gemini APIキーを入力して保存してください。この端末のブラウザに安全に記憶されます。
             </p>
             <div class="space-y-2">
                 <label class="text-xs font-bold text-slate-700">Gemini API Key</label>
@@ -261,23 +261,14 @@
     </footer>
 
     <script>
-        // パターンB：URLパラメータ ?key= から自動取得できるようサポート
+        // パターンC：ブラウザのローカルストレージにAPIキーを安全に保存して使用
         let currentInputMode = 'text';
 
         function getActiveApiKey() {
-            // 1. URLパラメータ ?key= が最優先
-            const urlParams = new URLSearchParams(window.location.search);
-            const queryKey = urlParams.get('key');
-            if (queryKey) {
-                return queryKey.trim();
-            }
-
-            // 2. 個別保存されたキーがあれば使用
             const customKey = localStorage.getItem('gemini_custom_api_key');
             if (customKey) {
                 return customKey.trim();
             }
-
             return "";
         }
 
@@ -375,7 +366,7 @@
         async function analyzeText() {
             const apiKey = getActiveApiKey();
             if (!apiKey) {
-                alert("APIキーが設定されていません。URLに「?key=あなたのAPIキー」を付けてアクセスするか、右上の「設定」からキーを入力してください。");
+                alert("APIキーが設定されていません。右上の「設定」ボタンを押してAPIキーを入力してください。");
                 openApiKeyModal();
                 return;
             }
@@ -532,7 +523,7 @@
         async function exploreIdeas() {
             const apiKey = getActiveApiKey();
             if (!apiKey) {
-                alert("APIキーが設定されていません。URLに「?key=あなたのAPIキー」を付けてアクセスするか、右上の「設定」からキーを入力してください。");
+                alert("APIキーが設定されていません。右上の「設定」ボタンを押してAPIキーを入力してください。");
                 openApiKeyModal();
                 return;
             }
@@ -630,7 +621,7 @@
                         questionsEl.appendChild(div);
                     });
 
-    exploreLoading.classList.add('hidden');
+                    exploreLoading.classList.add('hidden');
                     exploreOutputContainer.classList.remove('hidden');
                 } else {
                     throw new Error("データ取得に失敗しました");
